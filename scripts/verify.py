@@ -135,10 +135,10 @@ def optional_status() -> list[str]:
         "NB5 GGUF": REPO / "data" / "eval" / "deploy_meta.json",
         "NB6 benchmark": REPO / "data" / "eval" / "benchmark_results.json",
         "NB7 GRPO": REPO / "adapters" / "grpo" / "grpo_metrics.json",
-        "β-sweep": REPO / "submission" / "screenshots" / "bonus-beta-sweep.png",
+        "beta-sweep": REPO / "submission" / "screenshots" / "bonus-beta-sweep.png",
     }
     for label, path in checks.items():
-        done.append(f"{'✓' if path.exists() else '·'} {label}")
+        done.append(f"{'OK' if path.exists() else '..'} {label}")
     if (REPO / "data" / "eval" / "deploy_meta.json").exists():
         ggufs = list(REPO.glob("gguf*/**/*.gguf"))
         done.append(f"  GGUF files: {[rel(p) for p in ggufs] or 'none found'}")
@@ -151,10 +151,10 @@ def smoke() -> int:
     try:
         import torch
 
-        print(f"  ✓ torch {torch.__version__}")
+        print(f"  OK torch {torch.__version__}")
         if torch.cuda.is_available():
             dev = torch.cuda.get_device_properties(0)
-            print(f"  ✓ CUDA {dev.name} ({dev.total_memory / 1e9:.1f} GB)")
+            print(f"  OK CUDA {dev.name} ({dev.total_memory / 1e9:.1f} GB)")
         else:
             problems.append("No CUDA GPU: NB1–NB7 need one (NB0 runs on CPU). See HARDWARE-GUIDE.md.")
     except ImportError as exc:
@@ -162,7 +162,7 @@ def smoke() -> int:
     for mod in ["unsloth", "trl", "transformers", "peft", "bitsandbytes", "datasets", "lm_eval", "matplotlib"]:
         try:
             m = __import__(mod)
-            print(f"  ✓ {mod} {getattr(m, '__version__', '')}")
+            print(f"  OK {mod} {getattr(m, '__version__', '')}")
         except Exception as exc:  # unsloth raises NotImplementedError without a GPU
             problems.append(f"{mod} import failed: {type(exc).__name__}: {exc}")
     for nb in NOTEBOOKS:
@@ -176,11 +176,11 @@ def smoke() -> int:
     except Exception as exc:
         problems.append(f"lab22.config failed: {exc}")
     if problems:
-        print("\n✗ Smoke check FAILED:")
+        print("\nFAIL Smoke check FAILED:")
         for line in problems:
             print(f"  - {line}")
         return 1
-    print("\n✓ Smoke check passed. Next: `make pipeline`.")
+    print("\nOK Smoke check passed. Next: `make pipeline`.")
     return 0
 
 
@@ -213,9 +213,9 @@ def main() -> int:
             print(f"  - {line}")
     print()
     if not problems:
-        print("✓ Core checks passed. Push your repo and paste the URL into the LMS.")
+        print("OK Core checks passed. Push your repo and paste the URL into the LMS.")
         return 0
-    print("✗ Submission not ready:")
+    print("FAIL Submission not ready:")
     for line in problems:
         print(f"  - {line}")
     print("\nFix the items above and rerun `make verify`. See rubric.md.")
